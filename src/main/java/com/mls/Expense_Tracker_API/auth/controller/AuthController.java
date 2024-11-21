@@ -1,6 +1,5 @@
 package com.mls.Expense_Tracker_API.auth.controller;
 
-import com.mls.Expense_Tracker_API.auth.repository.TokenService;
 import com.mls.Expense_Tracker_API.auth.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
