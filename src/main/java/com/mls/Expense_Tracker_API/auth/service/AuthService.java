@@ -1,5 +1,6 @@
 package com.mls.Expense_Tracker_API.auth.service;
 
+import com.mls.Expense_Tracker_API.auth.controller.AuthRequest;
 import com.mls.Expense_Tracker_API.auth.controller.RegisterRequest;
 import com.mls.Expense_Tracker_API.auth.controller.TokenResponse;
 import com.mls.Expense_Tracker_API.auth.repository.Token;
@@ -8,7 +9,11 @@ import com.mls.Expense_Tracker_API.user.User;
 import com.mls.Expense_Tracker_API.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -16,13 +21,12 @@ public class AuthService {
 
     @Autowired
     private UserService userService;
-
     @Autowired
     private JwtService jwtService;
-
     @Autowired
     private TokenService tokenService;
-
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
     public TokenResponse register (RegisterRequest request) {
         User user = User.builder()
@@ -38,7 +42,22 @@ public class AuthService {
         return new TokenResponse(jwtToken,refreshToken);
     }
 
-    public void savUserToken(User user, String jwtToken) {
+    public TokenResponse authenticate (AuthRequest request) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getPassword()
+                )
+        );
+        User user = userService.findByEmail(request.getEmail()).orElseThrow();
+        String jwtToken = jwtService.generateToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
+        revokeAllUserTokens(user);
+        savUserToken(user,jwtToken);
+        return new TokenResponse(jwtToken,refreshToken);
+    }
+
+    private void savUserToken(User user, String jwtToken) {
         final Token token = Token.builder()
                 .user(user)
                 .token(jwtToken)
@@ -47,6 +66,17 @@ public class AuthService {
                 .isExpired(false)
                 .build();
         tokenService.saveToken(token);
+    }
+
+    private void revokeAllUserTokens(User user) {
+        final List<Token> validUserTokens = tokenService.findAllValidTokenByUser(user.getId());
+        if(!validUserTokens.isEmpty()) {
+            validUserTokens.forEach(token -> {
+                token.setIsRevoked(true);
+                token.setIsExpired(true);
+            });
+            tokenService.saveAllTokens(validUserTokens);
+        }
     }
 
 }
