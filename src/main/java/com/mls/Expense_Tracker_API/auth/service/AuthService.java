@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -77,6 +78,31 @@ public class AuthService {
             });
             tokenService.saveAllTokens(validUserTokens);
         }
+    }
+
+    public TokenResponse refreshToken(final String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new IllegalArgumentException("Invalid Bearer token");
+        }
+
+        final String refreshToken = authHeader.substring(7);
+        final String userEmail = jwtService.extractUsername(refreshToken);
+
+        if (userEmail == null) {
+            throw new IllegalArgumentException("Invalid Refresh Token");
+        }
+
+        final User user = userService.findByEmail(userEmail).orElseThrow(() -> new UsernameNotFoundException(userEmail));
+
+        if(!jwtService.isTokenValid(refreshToken,user)) {
+            throw new IllegalArgumentException("Invalid Refresh Token");
+        }
+
+        final String accessToken = jwtService.generateToken(user);
+        revokeAllUserTokens(user);
+        savUserToken(user, accessToken);
+        return new TokenResponse(accessToken,refreshToken);
+
     }
 
 }

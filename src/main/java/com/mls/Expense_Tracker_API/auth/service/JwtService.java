@@ -1,6 +1,7 @@
 package com.mls.Expense_Tracker_API.auth.service;
 
 import com.mls.Expense_Tracker_API.user.User;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -22,6 +23,15 @@ public class JwtService {
     private Long refreshExpiration;
 
 
+    public String extractUsername(final String token) {
+        final Claims jwtToken = Jwts.parserBuilder()
+                .setSigningKey(getSignInKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        return jwtToken.getSubject();
+    }
+
     public String generateToken (final User user) {
         return buildToken(user, jwtExpiration);
     }
@@ -39,6 +49,24 @@ public class JwtService {
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSignInKey())
                 .compact();
+    }
+
+    public boolean isTokenValid(final String token, final User user) {
+        final String username = extractUsername(token);
+        return (username.equals(user.getEmail()) && !isTokenExpired(token));
+    }
+
+    private boolean isTokenExpired(final String token) {
+        return extractExpiration(token).before(new Date());
+    }
+
+    private Date extractExpiration(final String token) {
+        final Claims jwtToken = Jwts.parserBuilder()
+                .setSigningKey(getSignInKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        return jwtToken.getExpiration();
     }
 
     private SecretKey getSignInKey() {
