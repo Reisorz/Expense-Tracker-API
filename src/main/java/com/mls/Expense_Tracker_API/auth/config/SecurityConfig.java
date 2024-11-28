@@ -2,6 +2,7 @@ package com.mls.Expense_Tracker_API.auth.config;
 
 import com.mls.Expense_Tracker_API.user.User;
 import com.mls.Expense_Tracker_API.user.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
