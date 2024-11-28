@@ -1,6 +1,7 @@
 package com.mls.Expense_Tracker_API.user;
 
 import com.mls.Expense_Tracker_API.auth.repository.Token;
+import com.mls.Expense_Tracker_API.expense.Expense;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,4 +33,7 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     private List<Token> tokens;
+
+    @OneToMany(mappedBy = "user")
+    private List<Expense> expenses;
 }
