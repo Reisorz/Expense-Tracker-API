@@ -1,5 +1,6 @@
 package com.mls.Expense_Tracker_API.expense;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.mls.Expense_Tracker_API.auth.repository.Token;
 import com.mls.Expense_Tracker_API.user.User;
@@ -36,6 +37,7 @@ public class Expense {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm" , timezone = "Europe/Madrid")
     private Date createdAt;
 
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

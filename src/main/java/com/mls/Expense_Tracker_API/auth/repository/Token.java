@@ -1,5 +1,6 @@
 package com.mls.Expense_Tracker_API.auth.repository;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.mls.Expense_Tracker_API.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -32,6 +33,7 @@ public final class Token {
     @Column(nullable = false)
     private Boolean isExpired;
 
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

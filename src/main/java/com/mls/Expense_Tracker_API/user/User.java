@@ -1,5 +1,8 @@
 package com.mls.Expense_Tracker_API.user;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.mls.Expense_Tracker_API.auth.repository.Token;
 import com.mls.Expense_Tracker_API.expense.Expense;
 import jakarta.persistence.*;
@@ -31,9 +34,11 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "user")
     private List<Token> tokens;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "user")
     private List<Expense> expenses;
 }
