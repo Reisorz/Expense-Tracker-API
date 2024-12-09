@@ -5,6 +5,7 @@ import com.mls.Expense_Tracker_API.auth.controller.RegisterRequest;
 import com.mls.Expense_Tracker_API.auth.controller.TokenResponse;
 import com.mls.Expense_Tracker_API.auth.repository.Token;
 import com.mls.Expense_Tracker_API.auth.repository.TokenService;
+import com.mls.Expense_Tracker_API.expection.UserNotFoundException;
 import com.mls.Expense_Tracker_API.user.User;
 import com.mls.Expense_Tracker_API.user.UserService;
 import lombok.RequiredArgsConstructor;
@@ -50,7 +51,7 @@ public class AuthService {
                         request.getPassword()
                 )
         );
-        User user = userService.findByEmail(request.getEmail()).orElseThrow();
+        User user = userService.findByEmail(request.getEmail()).orElseThrow(() -> new UserNotFoundException("User not found in database"));
         String jwtToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
         revokeAllUserTokens(user);
