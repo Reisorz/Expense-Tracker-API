@@ -27,5 +27,9 @@ public class ExpenseService {
         return expenseRepository.findById(id).orElse(null);
     }
 
+    public List<Expense> findExpenseByUserId(Long id) {
+        return expenseRepository.findByUserId(id);
+    }
+
 
 }

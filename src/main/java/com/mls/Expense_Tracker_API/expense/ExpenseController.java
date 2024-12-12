@@ -21,6 +21,11 @@ public class ExpenseController {
         return expenseService.listAllExpenses();
     }
 
+    @GetMapping("/list-user-expenses/{userId}")
+    public List<Expense> listUserExpenses(@PathVariable Long userId) {
+        return expenseService.findExpenseByUserId(userId);
+    }
+
     @PostMapping("/add-expense")
     public ResponseEntity<Expense> addExpense(@RequestBody Expense expense) {
         Expense addedExpense = expenseService.saveExpense(expense);
