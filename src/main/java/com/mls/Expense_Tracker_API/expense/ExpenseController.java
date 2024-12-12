@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +26,20 @@ public class ExpenseController {
     @GetMapping("/list-user-expenses/{userId}")
     public List<Expense> listUserExpenses(@PathVariable Long userId) {
         return expenseService.findExpenseByUserId(userId);
+    }
+
+    @GetMapping("/list-user-expenses-date-range-filter/{userId}")
+    public List<Expense> listUserExpensesInDateRange (@RequestParam("creationTimeStart") String creationTimeStart,
+                                                      @RequestParam("creationTimeEnd") String creationTimeEnd,
+                                                      @PathVariable Long userId) throws Exception {
+
+
+        //Transform into a correct Date format
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+        Date startDate = sdf.parse(creationTimeStart);
+        Date endDate = sdf.parse(creationTimeEnd);
+
+        return expenseService.findAllByCreatedAtBetweenAndUserId(startDate, endDate, userId);
     }
 
     @PostMapping("/add-expense")
