@@ -5,10 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/expense")
@@ -43,19 +40,15 @@ public class ExpenseController {
     }
 
     @PostMapping("/add-expense")
-    public ResponseEntity<Expense> addExpense(@RequestBody Expense expense) {
-        Expense addedExpense = expenseService.saveExpense(expense);
+    public ResponseEntity<Expense> addExpense(@RequestBody ExpenseDTO expenseDTO) {
+        Expense addedExpense = expenseService.saveExpense(expenseDTO);
         return ResponseEntity.ok(addedExpense);
     }
 
-    @PutMapping("/update-expense/{id}")
-    public ResponseEntity<Expense> updateExpense(@RequestBody Expense requestedExpense, @PathVariable Long id) {
-        Expense expense = expenseService.findExpenseById(id);
-        expense.setName(requestedExpense.getName());
-        expense.setExpenseType(requestedExpense.getExpenseType());
-        expense.setValue(requestedExpense.getValue());
-        expenseService.saveExpense(expense);
-        return ResponseEntity.ok(expense);
+    @PutMapping("/update-expense")
+    public ResponseEntity<Expense> updateExpense(@RequestBody ExpenseDTO requestedExpense) {
+            Expense updatedExpense = expenseService.updateExpense(requestedExpense);
+            return ResponseEntity.ok(updatedExpense);
     }
 
     @DeleteMapping("/delete-expense/{id}")
