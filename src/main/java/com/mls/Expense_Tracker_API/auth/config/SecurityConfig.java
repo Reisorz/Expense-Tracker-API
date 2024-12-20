@@ -1,11 +1,14 @@
 package com.mls.Expense_Tracker_API.auth.config;
 
+import com.mls.Expense_Tracker_API.auth.repository.Token;
+import com.mls.Expense_Tracker_API.auth.repository.TokenService;
 import com.mls.Expense_Tracker_API.user.User;
 import com.mls.Expense_Tracker_API.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -18,6 +21,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
@@ -43,6 +47,9 @@ public class SecurityConfig {
     @Autowired
     private JwtAuthFilter jwtAuthFilter;
 
+    @Autowired
+    private TokenService tokenService;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
@@ -61,7 +68,28 @@ public class SecurityConfig {
                 })
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .logout(logout ->
+                        logout.logoutUrl("/auth/logout")
+                                .addLogoutHandler(((request, response, authentication) -> {
+                                    final var authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+                                    logout(authHeader);
+                                }))
+                                .logoutSuccessHandler((request, response, authentication) ->
+                                        SecurityContextHolder.clearContext())
+                )
                 .build();
+    }
+
+    private void logout(final String token) {
+        if(token == null || !token.startsWith("Bearer ")) {
+            throw new IllegalArgumentException("Invalid token");
+        }
+
+        final String jwtToken = token.substring(7);
+        final Token foundToken = tokenService.findByToken(jwtToken).orElseThrow(() -> new IllegalArgumentException("Invalid Token"));
+        foundToken.setIsExpired(true);
+        foundToken.setIsRevoked(true);
+        tokenService.saveToken(foundToken);
     }
 
     //Config to allow crossOrigin
