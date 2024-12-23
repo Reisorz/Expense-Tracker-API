@@ -68,5 +68,4 @@ public class ExpenseController {
         Expense expense = expenseService.findExpenseById(id);
         return ResponseEntity.ok(expense);
     }
-
 }
