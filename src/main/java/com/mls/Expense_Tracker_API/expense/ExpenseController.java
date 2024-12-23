@@ -63,4 +63,10 @@ public class ExpenseController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/find-expense-by-id/{id}")
+    public ResponseEntity<Expense> findExpenseById(@PathVariable Long id) {
+        Expense expense = expenseService.findExpenseById(id);
+        return ResponseEntity.ok(expense);
+    }
+
 }
