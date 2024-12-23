@@ -20,6 +20,11 @@ public class ExpenseController {
         return expenseService.listAllExpenses();
     }
 
+    @GetMapping("/list-user-expenses-by-name/{id}-{name}")
+    public List<Expense> listUserExpensesByName(@PathVariable Long id,@PathVariable String name) {
+        return expenseService.listAllByName(id,name);
+    }
+
     @GetMapping("/list-user-expenses/{userId}")
     public List<Expense> listUserExpenses(@PathVariable Long userId) {
         return expenseService.findExpenseByUserId(userId);

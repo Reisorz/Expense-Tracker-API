@@ -21,6 +21,10 @@ public class ExpenseService {
         return expenseRepository.findAll();
     }
 
+    public List<Expense> listAllByName(Long userId,String name) {
+        return expenseRepository.findAllByUserIdAndNameContaining(userId, name);
+    }
+
     public Expense saveExpense(ExpenseDTO expenseDTO) {
         User user = userService.findById(expenseDTO.getUserId()).orElse(null);
         Expense expense = Expense.builder()
